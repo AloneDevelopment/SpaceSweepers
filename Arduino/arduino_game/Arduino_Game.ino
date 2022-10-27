@@ -72,12 +72,8 @@ class Rocket {
     boolean drawn;
 };
 
-Asteroid asteroid;
-Asteroid asteroid1;
-Asteroid asteroid2;
-
 Rocket rockets[5] = {Rocket(), Rocket(), Rocket(), Rocket(), Rocket()};
-Asteroid asteroids[5] = {Asteroid(),Asteroid(), Asteroid(), Asteroid()};
+Asteroid asteroids[5] = {Asteroid(), Asteroid(), Asteroid(), Asteroid()};
 
 Bonus healthBonus;
 /*================================================================
@@ -125,7 +121,6 @@ void loop() {
     game_frame(xVal, yVal);
     if (digitalRead(buttonOne) == 1) {
       useRocket();
-      Serial.println("Button Pressed");
     }
     while (objectSpawned) {
       generateObjects();
@@ -196,14 +191,11 @@ void game_frame(int xVal, int yVal) {
   u8g2.setFont(u8g2_font_unifont_t_symbols);
   u8g2.drawGlyph(player.x, player.y, 0x23e9);
   //Draw Objects
-  dCircle(asteroid.x, asteroid.y, asteroid.radius, 1);
-  dCircle(asteroid1.x, asteroid1.y, asteroid1.radius, 1);
-  dCircle(asteroid2.x, asteroid2.y, asteroid2.radius, 1);
   dText(0, 62, "Score:");
   dText(50, 62, toChar(player.score));
   dText(110, 62, toChar(player.lives));
   u8g2.drawLine(0, 54, 128, 54);
-  if (spawned) {
+  if (!spawned) {
     if (random(0, 50) == 30) {
       healthBonus.x = random(30, 110);
       healthBonus.bonus = random(1, 2);
@@ -214,6 +206,7 @@ void game_frame(int xVal, int yVal) {
     }
   }
   for (int i = 0 ; i < 5; i++) {
+    dCircle(asteroids[i].x, asteroids[i].y, asteroids[i].radius, 1);
     if (rockets[i].drawn) {
       dSquare(rockets[i].x, rockets[i].y, 2, 2, 1);
     }
@@ -259,39 +252,32 @@ void dSquare(int x, int y, int w, int h, int s) {
   u8g2.drawBox(x, y, w, h);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
 void checkCollisions() {
-  if (abs(player.x - asteroid.x) < asteroid.radius && abs(player.y - asteroid.y) < asteroid.radius) {
-    player.lives -= 1;
-    asteroid.x = 128;
-    asteroid.y = random(1, 54);
-    asteroid.worth = random(1, 100);
-    asteroid.radius = random(4, 8);
-  }
-  if (abs(player.x - asteroid1.x) < asteroid1.radius && abs(player.y - asteroid1.y) < asteroid1.radius) {
-    player.lives -= 1;
-    asteroid1.x = 128;
-    asteroid1.y = random(1, 54);
-    asteroid1.worth = random(1, 100);
-    asteroid1.radius = random(4, 8);
-  }
-  if (abs(player.x - asteroid2.x) < asteroid2.radius && abs(player.y - asteroid2.y) < asteroid2.radius) {
-    player.lives -= 1;
-    asteroid2.x = 128;
-    asteroid2.y = random(1, 54);
-    asteroid2.worth = random(1, 100);
-    asteroid2.radius = random(4, 8);
+  for (int i = 0; i < 5; i++) {
+    if (abs(player.x - asteroids[i].x) < asteroids[i].radius && abs(player.y - asteroids[i].y) < asteroids[i].radius) {
+      player.lives -= 1;
+      asteroids[i].x = 128;
+      asteroids[i].y = random(1, 54);
+      asteroids[i].worth = random(1, 100);
+      asteroids[i].radius = random(4, 8);
+    }
+    if (abs(rockets[i].x - asteroids[i].x) < asteroids[i].radius && abs(rockets[i].y - asteroids[i].y) < asteroids[i].radius) {
+      asteroids[i].x = 128;
+    }
+    if (rockets[i].x = 130) {
+      rockets[i].drawn = false;
+    }
   }
 
   if (abs(player.x - healthBonus.x) < 10 && abs(player.y - healthBonus.y) < 10) {
     player.lives += healthBonus.bonus;
     spawned = false;
   }
-  for (int i = 0; i < 5 ; i++) {
-    if(rockets[i].x = 130) {
-      rockets[i].drawn = false;
-    }
-    
-  }
+
   if (player.lives == 0) {
     dead = true;
     game = false;
@@ -323,60 +309,43 @@ void updateObjects() {
   }
   asteroid.x -= asteroid.fast;
 
-  if (asteroid1.x <= -1) {
-    player.score += asteroid1.worth;
-    asteroid1.x = 128;
-    asteroid1.y = random(1, 54);
-    asteroid1.worth = random(1, 100);
-    asteroid1.radius = random(4, 8);
-  }
-  if (asteroid.x <= -1) {
-    player.score += asteroid.worth;
-    asteroid.x = 128;
-    asteroid.y = random(1, 54);
-    asteroid.worth = random(1, 100);
-    asteroid.radius = random(4, 8);
-  }
-  if (asteroid2.x <= -1) {
-    player.score += asteroid2.worth;
-    asteroid2.x = 150;
-    asteroid2.y = random(10, 40);
-    asteroid2.worth = random(1, 50);
-    asteroid2.radius = random(5, 8);
+
+  for (int i = 0; i < 5; i ++) {
+    if (asteroids[i].x <= - 1) {
+      player.score += asteroids[]i.worth;
+      asteroids[i].x = 128;
+      asteroids[i].y = random(1, 54);
+      asteroids[i].worth = random(1, 100);
+      asteroids[i].radius = random(4, 8);
+    }
   }
 }
 
 void generateObjects() {
-  asteroid.x = 128;
-  asteroid.y = random(1, 54);
-  asteroid.radius = random(4, 8);
-  asteroid.worth = random(10, 100);
-  asteroid.fast = 1;
-  asteroid1.x = 150;
-  asteroid1.y = random(1, 54);
-  asteroid1.radius = random(4, 8);
-  asteroid1.worth = random(10, 100);
-  asteroid1.fast = 1;
-  asteroid2.x = 150;
-  asteroid2.y = random(10, 40);
-  asteroid2.radius = random(5, 8);
-  asteroid2.worth = random(1, 100);
-  asteroid2.fast = 1;
+  for (int i = 0 ; i < 5; i++) {
+    asteroids[i].x = 128;
+    asteroids[i].y = random(1, 54);
+    asteroids[i].radius = random(4, 8);
+    asteroids[i].worth = random(10, 100);
+    asteroids[i].fast = 1;
+  }
 
   objectSpawned = false;
 }
 
 void useRocket() {
-  Icheck += 1;
-  if (rockets[Icheck].drawn == false) {
-    if (rocket_cooldown == 0) {
-      rockets[Icheck].x = player.x;
-      rockets[Icheck].y = player.y;
-      rockets[Icheck].drawn = true;
+  if (rocket_cooldown  == 0) {
+    Icheck += 1;
+    if (rockets[Icheck].drawn == false) {
+      if (rocket_cooldown == 0) {
+        rockets[Icheck].x = player.x;
+        rockets[Icheck].y = player.y;
+        rockets[Icheck].drawn = true;
+      }
     }
-  }
-  if (Icheck == 4) {
-    Icheck = 0;
+    if (Icheck == 4) {
+      Icheck = 0;
+    }
   }
 }
 
